@@ -119,35 +119,10 @@ func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni,
 	// Get name of country of interest
 	countryName := fmt.Sprintf("%v", uniReq["country"])
 
-	// Create url to request from:
-	reqUrl := COUNTRY_URL + COUNTRY_SEARCH_URL + countryName
-
-	// Get uni from hoplab
-	res, err := Request(reqUrl, http.MethodGet, "")
+	// Get country
+	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return Uni{}, err
-	}
-
-	// List of open-ended map structures, which we can populate with results from hipolab
-	var countriesReq []map[string]interface{}
-
-	// Decode request into countries
-	err = json.NewDecoder(res.Body).Decode(&countriesReq)
-	if err != nil {
-		log.Println("Error during encoding: " + err.Error())
-		http.Error(w, "Error during decoding", http.StatusInternalServerError)
-		return Uni{}, err
-	}
-
-	// Create country map
-	var country map[string]interface{}
-
-	// In case of multiple countries with similar name, get the one we want from the list
-	for _, countryReq := range countriesReq {
-		if getNameCountry(countryReq) == countryName {
-			country = countryReq
-		}
 	}
 
 	// Assemble the final struct
@@ -199,4 +174,62 @@ func getWebpagesUni(uni map[string]interface{}) []string {
 		webpages = append(webpages, webpage.(string))
 	}
 	return webpages
+}
+
+/*
+Return country of a university as a string
+*/
+func getCountryUni(uni map[string]interface{}) string {
+	return uni["country"].(string)
+}
+
+/*
+Returns a map of the country specified
+*/
+func getCountryReq(w http.ResponseWriter, countryName string, searchMethod string) (map[string]interface{}, error ) {
+	// Create country map
+	var country map[string]interface{}
+	
+	// Create url to request from:
+	reqUrl := COUNTRY_URL + searchMethod + countryName
+
+	// Get country from restcountries
+	res, err := Request(reqUrl, http.MethodGet, "")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return country, err
+	}
+
+	// List of open-ended map structures, which we can populate with results from hipolab
+	var countriesReq []map[string]interface{}
+
+	// Decode request into countries
+	err = json.NewDecoder(res.Body).Decode(&countriesReq)
+	if err != nil {
+		log.Println("Error during encoding: " + err.Error())
+		http.Error(w, "Error during decoding", http.StatusInternalServerError)
+		return country, err
+	}
+
+
+	// In case of multiple countries with similar name, get the one we want from the list
+	for _, countryReq := range countriesReq {
+		if getNameCountry(countryReq) == countryName {
+			country = countryReq
+		}
+	}
+
+	return country, nil
+}
+
+/*
+Returns if given value exists in array
+*/
+func find(value interface{}, array []interface{}) (bool) {
+    for _, v := range array {
+        if v == value {
+            return true
+        }
+    }
+    return false
 }
