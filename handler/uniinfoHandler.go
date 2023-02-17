@@ -16,27 +16,28 @@ func UniinfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Split path into args
+	args := strings.Split(r.URL.Path, "/")
+
+	// Check if url is correctly formated
+	if len(args) != 5 || args[4] == "" {
+		http.Error(w, "Malformed URL, Expecting format "+UNIINFI_PATH+"name", http.StatusBadRequest)
+		return
+	}
+
 	// Get universities by request
-	unis, err := getUnis(r)
+	unisReq, err := getUnisReq(w, r, args[4])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get universities by request
+	unis, err := createUnisStruct(w, unisReq)
+	if err != nil {
 		return
 	}
 
 	// Respond with content to user
 	handleGetRequest(w, r, CONT_TYPE_JSON, unis)
 
-}
-
-/*
-Get all universeties from hipolab with arguments provided by client in request
-*/
-func getUnis(r *http.Request) ([]Uni, error) {
-	args := strings.Split(r.URL.Path, "/")
-	bname := args[len(args)-1]
-
-	var uni Uni
-	uni.Name = bname
-
-	return []Uni{uni}, nil
 }

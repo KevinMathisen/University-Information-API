@@ -15,4 +15,24 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse url to get country, university name and limit
+
+	// Get universities by university name given
+	/*
+		unisReq, err := getUnisReq(w, r)
+		if err != nil {
+			return
+		}
+
+		// Filter universeties by country specified and limit if defined
+
+		// Get universities by request
+		unis, err := createUnisStruct(w, unisReq)
+		if err != nil {
+			return
+		}
+
+		// Respond with content to user
+		handleGetRequest(w, r, CONT_TYPE_JSON, unis)
+	*/
 }

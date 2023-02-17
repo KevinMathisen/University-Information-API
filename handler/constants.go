@@ -13,6 +13,11 @@ const UNI_SEARCH_PATH = "/search?"
 const COUNTRY_URL = "https://restcountries.com"
 const COUNTRY_SEARCH_URL = "/v3.1/name/"
 
+// URL for local services
+//const UNI_URL = "http://localhost:8081"
+//const COUNTRY_URL = "http://localhost:8081"
+//const UNI_SEARCH_PATH = "/"
+
 // Service version
 const VERSION = "v1"
 
