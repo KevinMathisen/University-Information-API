@@ -45,7 +45,7 @@ func Request(url string, method string, contentType string) (http.Response, erro
 }
 
 /*
-Handles get request to diagnostic enpoint
+Handles get request when body is of type json
 */
 func handleGetRequest(w http.ResponseWriter, r *http.Request, contentType string, jsonBody interface{}) {
 	// Write content type
@@ -65,13 +65,18 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request, contentType string
 /*
 Get all universeties from hipolab with arguments provided by client in request
 */
-func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string) ([]map[string]interface{}, error) {
+func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country string) ([]map[string]interface{}, error) {
 
 	// List of open-ended map structures, which we can populate with results from hipolab
 	var unisReq []map[string]interface{}
 
 	// Create url to request from:							TODO: add + "name="
-	reqUrl := strings.ReplaceAll((UNI_URL + UNI_SEARCH_PATH + "name=" + uniName), " ", "%20")
+	reqUrl := UNI_URL + UNI_SEARCH_PATH + "name=" + formatURLArg(uniName)
+
+	// Check if country specified
+	if country != "" {
+		reqUrl += "&country=" + formatURLArg(country)
+	}
 
 	// Get uni from hoplab
 	res, err := Request(reqUrl, http.MethodGet, "")
@@ -120,7 +125,7 @@ func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni,
 	countryName := fmt.Sprintf("%v", uniReq["country"])
 
 	// Get country
-	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL)
+	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL, false)
 	if err != nil {
 		return Uni{}, err
 	}
@@ -186,10 +191,10 @@ func getCountryUni(uni map[string]interface{}) string {
 /*
 Returns a map of the country specified
 */
-func getCountryReq(w http.ResponseWriter, countryName string, searchMethod string) (map[string]interface{}, error ) {
+func getCountryReq(w http.ResponseWriter, countryName string, searchMethod string, isoSearch bool) (map[string]interface{}, error) {
 	// Create country map
 	var country map[string]interface{}
-	
+
 	// Create url to request from:
 	reqUrl := COUNTRY_URL + searchMethod + countryName
 
@@ -211,10 +216,9 @@ func getCountryReq(w http.ResponseWriter, countryName string, searchMethod strin
 		return country, err
 	}
 
-
 	// In case of multiple countries with similar name, get the one we want from the list
 	for _, countryReq := range countriesReq {
-		if getNameCountry(countryReq) == countryName {
+		if strings.EqualFold(getNameCountry(countryReq), countryName) || isoSearch {
 			country = countryReq
 		}
 	}
@@ -223,13 +227,29 @@ func getCountryReq(w http.ResponseWriter, countryName string, searchMethod strin
 }
 
 /*
-Returns if given value exists in array
+Returns if given value exists in array non case sensetive
 */
-func find(value interface{}, array []interface{}) (bool) {
-    for _, v := range array {
-        if v == value {
-            return true
-        }
-    }
-    return false
+func find(value string, array []string) bool {
+	for _, v := range array {
+		if strings.EqualFold(v, value) {
+			return true
+		}
+	}
+	return false
+}
+
+/*
+Return the iso of a country from map as a string
+
+func getISOCountry(country map[string]interface{}) string {
+	return (country["name"].(map[string]interface{}))["common"].(string)
+}
+*/
+
+/*
+Formats an url for a request
+*/
+func formatURLArg(url string) string {
+	url = strings.TrimSpace(strings.ReplaceAll(url, "%20", " "))
+	return strings.ReplaceAll(url, " ", "%20")
 }

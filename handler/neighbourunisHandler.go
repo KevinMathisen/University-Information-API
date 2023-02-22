@@ -1,7 +1,9 @@
-package handler
+﻿package handler
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -16,46 +18,42 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limit := 0
 	// Parse url to get country, university name and limit
-	// If user specified limit set limit, if not set -1
-	if value := (r.URL.Query()).Get("limit"); value {
-		limit = value		// Convert to int, TODO
+	limitstring := (r.URL.Query()).Get("limit")
+
+	// Try to convert limit to a number if limit is specified
+	limit, err := strconv.Atoi(limitstring)
+	if err != nil && limitstring != "" || limit < 0 {
+		log.Println("Error limit: " + err.Error())
+		http.Error(w, "Malformed URL, Invalid limit set ", http.StatusBadRequest)
+		return
 	}
 
 	// Split path into args
 	args := strings.Split(r.URL.Path, "/")
 
 	// Check if URl is correctly formated
-	if len(args) != 4 || args[2] == "" || args[3] == "" {
+	if len(args) != 6 || args[4] == "" || args[5] == "" {
 		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
 		return
 	}
 
-	// Get universities by university name given
-	unisReq, err := getUnisReq(w, r, args[3])
-	if err != nil {
-		return
-	}
-
 	// Get contires we want to find universeties in
-	countries, err := getNeighboursCountryReq(w, args[2])
+	countries, err := getNeighboursCountryReq(w, args[4])
 	if err != nil {
 		return
 	}
 
-	var unisFiltered []map[string]interface{} 
-
-	// For all universeites, filter away those not in target countries
-	//  and set a max amount of allowed unis based on limit specified
-	for i, uni := range unisReq {
-		if find(getCountryUni(uni), countries) && i < limit {
-			unisFiltered = append(unisFiltered, uni)
-		}
+	// Get unisversities for each border country
+	unisReq, err := getUnisInCountry(w, r, args[5], countries, limit)
+	if err != nil {
+		return
 	}
+
+	log.Println(unisReq)
 
 	// Get universities by request
-	unis, err := createUnisStruct(w, unisFiltered)
+	unis, err := createUnisStruct(w, unisReq)
 	if err != nil {
 		return
 	}
@@ -68,7 +66,7 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 /*
 Return a list of the names of the countries who border country specified
 */
-func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]string, err) {
+func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]string, error) {
 	// List we want to return
 	var countries []string
 
@@ -76,15 +74,15 @@ func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]strin
 	// NB! If assignment only wants neighbours, not including country itself, remove this line! ----------------------
 	countries = append(countries, countryName)
 
-	// Get country specified 
-	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL)
+	// Get country specified
+	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL, false)
 	if err != nil {
-
+		return countries, err
 	}
 
 	// For each bordering country, get country name and add to array
 	for _, border := range country["borders"].([]interface{}) {
-		country, err = getCountryReq(w, border, ISO_SEARCH_URL)
+		country, err = getCountryReq(w, border.(string), ISO_SEARCH_URL, true)
 		if err != nil {
 			return countries, err
 		}
@@ -93,5 +91,32 @@ func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]strin
 
 	return countries, nil
 
-	
+}
+
+/*
+Returns all universeties with given name in given countries
+*/
+func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, countries []string, limit int) ([]map[string]interface{}, error) {
+	var unis []map[string]interface{}
+
+	// Get universeties for each country
+	for i, country := range countries {
+		// If limit set by user is reached
+		if i >= limit && limit != 0 {
+			return unis, nil
+		}
+
+		log.Println("Unireq " + uniName + " " + country)
+
+		// Get all universeties for a given country
+		unisReq, err := getUnisReq(w, r, uniName, country)
+		if err != nil {
+			return unis, err
+		}
+
+		// Save university
+		unis = append(unis, unisReq...)
+	}
+
+	return unis, nil
 }

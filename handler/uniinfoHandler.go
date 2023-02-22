@@ -26,7 +26,7 @@ func UniinfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get universities by request
-	unisReq, err := getUnisReq(w, r, args[4])
+	unisReq, err := getUnisReq(w, r, args[4], "")
 	if err != nil {
 		return
 	}
