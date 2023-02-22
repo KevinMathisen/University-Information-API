@@ -63,7 +63,7 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request, contentType string
 }
 
 /*
-Get all universeties from hipolab with arguments provided by client in request
+Get all universities from hipolab with arguments provided by client in request
 */
 func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country string) ([]map[string]interface{}, error) {
 
@@ -98,7 +98,7 @@ func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country 
 }
 
 /*
-Creates and return a slice of all universeties provided
+Creates and return a slice of all universities provided
 */
 func createUnisStruct(w http.ResponseWriter, unisReq []map[string]interface{}) ([]Uni, error) {
 	var unis []Uni
@@ -121,71 +121,23 @@ Create a uni struct with all information by asking restcountries
 */
 func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni, error) {
 
-	// Get name of country of interest
-	countryName := fmt.Sprintf("%v", uniReq["country"])
-
 	// Get country
-	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL, false)
+	country, err := getCountryReq(w, getCountryUni(uniReq), COUNTRY_SEARCH_URL, false)
 	if err != nil {
 		return Uni{}, err
 	}
 
-	// Assemble the final struct
+	// Assemble the struct
 	uni := Uni{
 		Name:      uniReq["name"].(string),
-		Country:   uniReq["country"].(string),
-		Isocode:   country["cca2"].(string),
+		Country:   getCountryUni(uniReq),
+		Isocode:   getISOCountry(country),
 		Webpages:  getWebpagesUni(uniReq),
 		Languages: getLanguagesCountry(country),
 		Map:       getMapCountry(country),
 	}
 
 	return uni, nil
-}
-
-/*
-Return the name of a country from map as a string
-*/
-func getNameCountry(country map[string]interface{}) string {
-	return (country["name"].(map[string]interface{}))["common"].(string)
-}
-
-/*
-Return the openstreetmap from a country as a string
-*/
-func getMapCountry(country map[string]interface{}) string {
-	return (country["maps"].(map[string]interface{}))["openStreetMaps"].(string)
-}
-
-/*
-Return all languages as a map of strings from a country
-*/
-func getLanguagesCountry(country map[string]interface{}) map[string]string {
-	languages := make(map[string]string)
-	// Convert each language in country map to a string and add to new map
-	for key, language := range country["languages"].(map[string]interface{}) {
-		languages[key] = language.(string)
-	}
-	return languages
-}
-
-/*
-Return all webpages from a university as a list of strings
-*/
-func getWebpagesUni(uni map[string]interface{}) []string {
-	var webpages []string
-	// Convert each webpage in uni map to a string and add to new list
-	for _, webpage := range uni["web_pages"].([]interface{}) {
-		webpages = append(webpages, webpage.(string))
-	}
-	return webpages
-}
-
-/*
-Return country of a university as a string
-*/
-func getCountryUni(uni map[string]interface{}) string {
-	return uni["country"].(string)
 }
 
 /*
@@ -227,6 +179,55 @@ func getCountryReq(w http.ResponseWriter, countryName string, searchMethod strin
 }
 
 /*
+Return the name of a country from map as a string
+*/
+func getNameCountry(country map[string]interface{}) string {
+	return (country["name"].(map[string]interface{}))["common"].(string)
+}
+
+/*
+Return the openstreetmap from a country as a string
+*/
+func getMapCountry(country map[string]interface{}) string {
+	return (country["maps"].(map[string]interface{}))["openStreetMaps"].(string)
+}
+
+/*
+Return all languages as a map of strings from a country
+*/
+func getLanguagesCountry(country map[string]interface{}) map[string]string {
+	languages := make(map[string]string)
+
+	// Convert each language in country map to a string and add to new map
+	for key, language := range country["languages"].(map[string]interface{}) {
+		languages[key] = language.(string)
+	}
+
+	return languages
+}
+
+/*
+Return all webpages from a university as a list of strings
+*/
+func getWebpagesUni(uni map[string]interface{}) []string {
+	var webpages []string
+
+	// Convert each webpage in uni map to a string and add to new list
+	for _, webpage := range uni["web_pages"].([]interface{}) {
+		webpages = append(webpages, webpage.(string))
+	}
+
+	return webpages
+}
+
+/*
+Return country of a university as a string
+*/
+func getCountryUni(uni map[string]interface{}) string {
+	return uni["country"].(string)
+}
+
+/*
 Returns if given value exists in array non case sensetive
 */
 func find(value string, array []string) bool {
@@ -240,11 +241,10 @@ func find(value string, array []string) bool {
 
 /*
 Return the iso of a country from map as a string
-
+*/
 func getISOCountry(country map[string]interface{}) string {
 	return (country["name"].(map[string]interface{}))["common"].(string)
 }
-*/
 
 /*
 Formats an url for a request

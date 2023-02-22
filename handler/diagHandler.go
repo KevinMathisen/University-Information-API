@@ -5,12 +5,10 @@ import (
 	"time"
 )
 
-var start time.Time = time.Now()
-
 /*
 Handler for diagnostic endpoint
 */
-func DiagHandler(w http.ResponseWriter, r *http.Request) {
+func DiagHandler(w http.ResponseWriter, r *http.Request, start time.Time) {
 
 	// Send error if request is not GET:
 	if r.Method != http.MethodGet {
@@ -19,7 +17,7 @@ func DiagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate diagnosis reponse
-	diagRes, err := createDiagRes()
+	diagRes, err := createDiagRes(start)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,7 +31,7 @@ func DiagHandler(w http.ResponseWriter, r *http.Request) {
 /*
 Creates and returns a diag struct
 */
-func createDiagRes() (Diag, error) {
+func createDiagRes(start time.Time) (Diag, error) {
 
 	// Get request from uni and country source
 	resUni, err := Request(UNI_URL, http.MethodHead, "")
@@ -59,29 +57,3 @@ func createDiagRes() (Diag, error) {
 
 	return diagResponse, nil
 }
-
-/*
-Handles get request to diagnostic enpoint
-
-func handleGetRequestDiag(w http.ResponseWriter, r *http.Request) {
-	// Write content type
-	w.Header().Add("content-type", CONT_TYPE_JSON)
-
-	// Generate diagnosis reponse
-	diagRes, err := createDiagRes()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Encode content and write to response
-	err = json.NewEncoder(w).Encode(diagRes)
-	if err != nil {
-		http.Error(w, "Error during encoding: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Manually set response http status to ok
-	w.WriteHeader(http.StatusOK)
-}
-*/

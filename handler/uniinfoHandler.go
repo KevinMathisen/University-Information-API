@@ -31,7 +31,7 @@ func UniinfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get universities by request
+	// Create universities struct
 	unis, err := createUnisStruct(w, unisReq)
 	if err != nil {
 		return

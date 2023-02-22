@@ -1,6 +1,7 @@
 ﻿package handler
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,41 +19,31 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse url to get country, university name and limit
-	limitstring := (r.URL.Query()).Get("limit")
-
-	// Try to convert limit to a number if limit is specified
-	limit, err := strconv.Atoi(limitstring)
-	if err != nil && limitstring != "" || limit < 0 {
-		log.Println("Error limit: " + err.Error())
-		http.Error(w, "Malformed URL, Invalid limit set ", http.StatusBadRequest)
+	// Get limit from request
+	limit, err := getLimitParam(w, r)
+	if err != nil {
 		return
 	}
 
-	// Split path into args
-	args := strings.Split(r.URL.Path, "/")
-
-	// Check if URl is correctly formated
-	if len(args) != 6 || args[4] == "" || args[5] == "" {
-		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
+	// Get country and university name from request
+	country, uniName, err := getArgsNURL(w, r)
+	if err != nil {
 		return
 	}
 
-	// Get contires we want to find universeties in
-	countries, err := getNeighboursCountryReq(w, args[4])
+	// Get contires we want to find universities in
+	countries, err := getNeighboursCountryReq(w, country)
 	if err != nil {
 		return
 	}
 
 	// Get unisversities for each border country
-	unisReq, err := getUnisInCountry(w, r, args[5], countries, limit)
+	unisReq, err := getUnisInCountry(w, r, uniName, countries, limit)
 	if err != nil {
 		return
 	}
 
-	log.Println(unisReq)
-
-	// Get universities by request
+	// Create universities struct
 	unis, err := createUnisStruct(w, unisReq)
 	if err != nil {
 		return
@@ -71,7 +62,7 @@ func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]strin
 	var countries []string
 
 	// Add Original country to list of countries.
-	// NB! If assignment only wants neighbours, not including country itself, remove this line! ----------------------
+	// NB If assignment only wants neighbours, not including country itself, remove this line
 	countries = append(countries, countryName)
 
 	// Get country specified
@@ -94,29 +85,61 @@ func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]strin
 }
 
 /*
-Returns all universeties with given name in given countries
+Returns all universities with given name in given countries
 */
 func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, countries []string, limit int) ([]map[string]interface{}, error) {
 	var unis []map[string]interface{}
 
-	// Get universeties for each country
+	// Get universities for each country
 	for i, country := range countries {
 		// If limit set by user is reached
 		if i >= limit && limit != 0 {
 			return unis, nil
 		}
 
-		log.Println("Unireq " + uniName + " " + country)
-
-		// Get all universeties for a given country
+		// Get all universities for a given country
 		unisReq, err := getUnisReq(w, r, uniName, country)
 		if err != nil {
 			return unis, err
 		}
 
-		// Save university
+		// Save universities
 		unis = append(unis, unisReq...)
 	}
 
 	return unis, nil
+}
+
+/*
+Return limit from URL or 0 if not set, and checks for errors
+*/
+func getLimitParam(w http.ResponseWriter, r *http.Request) (int, error) {
+	// Parse url to get country, university name and limit
+	limitstring := (r.URL.Query()).Get("limit")
+
+	// Try to convert limit to a number if limit is specified
+	limit, err := strconv.Atoi(limitstring)
+	if err != nil && limitstring != "" || limit < 0 {
+		log.Println("Error limit: " + err.Error())
+		http.Error(w, "Malformed URL, Invalid limit set ", http.StatusBadRequest)
+		return -1, err
+	}
+
+	return limit, nil
+}
+
+/*
+Get arguments country name and university name from URL path, and checks for errors
+*/
+func getArgsNURL(w http.ResponseWriter, r *http.Request) (string, string, error) {
+	// Split path into args
+	args := strings.Split(r.URL.Path, "/")
+
+	// Check if URl is correctly formated
+	if len(args) != 6 || args[4] == "" || args[5] == "" {
+		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
+		return "", "", errors.New("Malformed URL")
+	}
+
+	return args[4], args[5], nil
 }

@@ -5,7 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
+
+// Start time for diagnostics
+var start time.Time = time.Now()
 
 func main() {
 
@@ -18,7 +22,7 @@ func main() {
 
 	// Set up handler enpoints
 	http.HandleFunc(handler.DEFAULT_PATH, handler.DefaultHandler)
-	http.HandleFunc(handler.DIAG_PATH, handler.DiagHandler)
+	http.HandleFunc(handler.DIAG_PATH, func(w http.ResponseWriter, r *http.Request) { handler.DiagHandler(w, r, start) })
 	http.HandleFunc(handler.UNIINFI_PATH, handler.UniinfoHandler)
 	http.HandleFunc(handler.NEIGHBOURUNIS_PATH, handler.NeighbourunisHandler)
 

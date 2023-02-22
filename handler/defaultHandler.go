@@ -16,6 +16,7 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Set content type
 	w.Header().Set("content-type", "text/html")
 
 	// Information to display to user on root path
