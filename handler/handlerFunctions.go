@@ -69,16 +69,14 @@ func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country 
 
 	// List of open-ended map structures, which we can populate with results from hipolab
 	var unisReq []map[string]interface{}
-	log.Println("creating requrl: ")
+
 	// Create url to request from:							TODO: add + "name="
 	reqUrl := UNI_URL + UNI_SEARCH_PATH + "name=" + formatURLArg(uniName)
 
-	log.Println("Checking if country is emtpy: " + country)
 	// Check if country specified
 	if country != "" {
 		reqUrl += "&country=" + formatURLArg(country)
 	}
-	log.Println("requrl: " + reqUrl)
 
 	// Get uni from hoplab
 	res, err := Request(reqUrl, http.MethodGet, "")

@@ -103,6 +103,12 @@ func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, co
 			return unis, err
 		}
 
+		// Check if limit is exceded, if so we cut out part of the response
+		if len(unis)+len(unisReq) > limit && limit != 0 {
+			maxLen := limit - len(unis)
+			unisReq = unisReq[:maxLen]
+		}
+
 		// Save universities
 		unis = append(unis, unisReq...)
 	}
