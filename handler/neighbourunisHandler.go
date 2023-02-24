@@ -91,9 +91,9 @@ func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, co
 	var unis []map[string]interface{}
 
 	// Get universities for each country
-	for i, country := range countries {
+	for _, country := range countries {
 		// If limit set by user is reached
-		if i >= limit && limit != 0 {
+		if len(unis) >= limit && limit != 0 {
 			return unis, nil
 		}
 
