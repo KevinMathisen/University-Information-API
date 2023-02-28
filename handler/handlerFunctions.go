@@ -2,7 +2,6 @@
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -19,8 +18,6 @@ func Request(url string, method string, contentType string) (http.Response, erro
 	// Create request
 	r, err := http.NewRequest(method, url, nil)
 	if err != nil {
-		log.Println("Error when creating request" + err.Error())
-		fmt.Errorf("Error when creating request", err.Error())
 		return response, err
 	}
 
@@ -35,8 +32,6 @@ func Request(url string, method string, contentType string) (http.Response, erro
 	// Issue http request
 	res, err := client.Do(r)
 	if err != nil {
-		log.Println("Error in response" + err.Error())
-		fmt.Errorf("Error in response", err.Error())
 		return response, err
 	}
 
@@ -121,7 +116,7 @@ Create a uni struct with all information by asking restcountries
 */
 func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni, error) {
 
-	// Get country
+	// Get country uni is located in
 	country, err := getCountryReq(w, getCountryUni(uniReq), COUNTRY_SEARCH_URL, false)
 	if err != nil {
 		return Uni{}, err
@@ -228,18 +223,6 @@ func getCountryUni(uni map[string]interface{}) string {
 }
 
 /*
-Returns if given value exists in array non case sensetive
-*/
-func find(value string, array []string) bool {
-	for _, v := range array {
-		if strings.EqualFold(v, value) {
-			return true
-		}
-	}
-	return false
-}
-
-/*
 Return the iso of a country from map as a string
 */
 func getISOCountry(country map[string]interface{}) string {
@@ -250,6 +233,9 @@ func getISOCountry(country map[string]interface{}) string {
 Formats an url for a request
 */
 func formatURLArg(url string) string {
+	// Remove all white space in front of and behind argument
 	url = strings.TrimSpace(strings.ReplaceAll(url, "%20", " "))
+
+	// Return argument with all spaces replaced with %20
 	return strings.ReplaceAll(url, " ", "%20")
 }

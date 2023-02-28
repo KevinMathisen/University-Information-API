@@ -125,6 +125,7 @@ func getLimitParam(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	// Try to convert limit to a number if limit is specified
 	limit, err := strconv.Atoi(limitstring)
+	// If there was an error and limit was set by user, or if the limit is less than 0
 	if err != nil && limitstring != "" || limit < 0 {
 		log.Println("Error limit: " + err.Error())
 		http.Error(w, "Malformed URL, Invalid limit set ", http.StatusBadRequest)
@@ -144,7 +145,7 @@ func getArgsNURL(w http.ResponseWriter, r *http.Request) (string, string, error)
 	// Check if URl is correctly formated
 	if len(args) != 6 || args[4] == "" || args[5] == "" {
 		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
-		return "", "", errors.New("Malformed URL")
+		return "", "", errors.New("malformed URL")
 	}
 
 	return args[4], args[5], nil

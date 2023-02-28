@@ -33,12 +33,13 @@ Creates and returns a diag struct
 */
 func createDiagRes(start time.Time) (Diag, error) {
 
-	// Get request from uni and country source
+	// Get request from uni  source
 	resUni, err := Request(UNI_URL, http.MethodHead, "")
 	if err != nil {
 		return Diag{}, err
 	}
 
+	// Get request from country source
 	resCountry, err := Request(COUNTRY_URL, http.MethodHead, "")
 	if err != nil {
 		return Diag{}, err
