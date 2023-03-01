@@ -1,4 +1,4 @@
-# assignment-1
+# Assignment 1
 
 Assignment 1 for PROG2005 Spring 2023
 
@@ -94,7 +94,7 @@ Path: unisearcher/v1/neighbourunis/{:country_name}/{:partial_or_complete_univers
 Example request `unisearcher/v1/neighbourunis/china/University%20of%20Science?limit=1`
 
 ### Response
-Even though the request is different, the response will be identical to the response for the uniinfo. See [Response uniinfo](#Response1)
+Even though the request is different, the response will be identical to the response for the uniinfo. See Response uniinfo
 
 ## Diag
 For viewing the status of the application, and the services it depends on. Returns the status code of the universities and countries api, and the version and uptime in seconds of the application running.
