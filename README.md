@@ -46,13 +46,12 @@ For retriving information about all universities which match the given name. Thi
 - Langauges spoken in country
 - Openstreetmap of the country
 
-Only http method get is supported. 
 ### Request
 ```
 Method: GET
 Path: unisearcher/v1/uniinfo/{:partial_or_complete_university_name}/
 ```
-Name of university can be complete or partial. If partial is used, the name given has to either be a single word, or if multiple words are given, have to be found in the beginning of the real university name. This is because of a limitation in the API used in the backend.
+Name of university can be complete or partial. If partial is used, the name given has to either be a single word, or if multiple words are given, have to be found in the beginning of the real university name. This is because of a limitation in the API used in the backend. Leading and trailing whitespace around university name provided is ignored.
 
 Example request `unisearcher/v1/uniinfo/norwegian%20university%20of%20science/`
 
@@ -78,7 +77,7 @@ Body example:
 ]
 ```
 ## Neighboursunis
-For retriving information about all universities which match the given name in the country and neighbouring countries of the country provided. 
+For retriving information about all universities which match the given name in the neighbouring countries of the country provided. 
 The information returned will be identical in format to the uniinfo endpoint. 
 
 ### Request
@@ -88,14 +87,14 @@ Path: unisearcher/v1/neighbourunis/{:country_name}/{:partial_or_complete_univers
 ```
 `{:country_name}` is the English name of the country that is used to find neighbouring contries, which is then used to find universities.
 
-{:partial_or_complete_university_name} is the partial or complete university name, which is used to find universities in neighbouring countries
+`{:partial_or_complete_university_name}` is the partial or complete university name, which is used to find universities in neighbouring countries
 
-{?limit={:number}} is an optional parameter that limits the number of universities in neighbouring countries that are returned. If the limit is not set, or if it is set to 0, there will be no limit. Else the limit has to be a positive integer.
+`{?limit={:number}}` is an optional parameter that limits the number of universities in neighbouring countries that are returned. If the limit is not set, or if it is set to 0, there will be no limit. Else the limit has to be a positive integer.
 
 Example request `unisearcher/v1/neighbourunis/china/University%20of%20Science?limit=1`
 
 ### Response
-Even though the request is different, the response will be identical to the response for the uniinfo. 
+Even though the request is different, the response will be identical to the response for the uniinfo. See [Response uniinfo](#Response1)
 
 ## Diag
 For viewing the status of the application, and the services it depends on. Returns the status code of the universities and countries api, and the version and uptime in seconds of the application running.
