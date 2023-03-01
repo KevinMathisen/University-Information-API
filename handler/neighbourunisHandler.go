@@ -2,7 +2,6 @@
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -127,7 +126,6 @@ func getLimitParam(w http.ResponseWriter, r *http.Request) (int, error) {
 	limit, err := strconv.Atoi(limitstring)
 	// If there was an error and limit was set by user, or if the limit is less than 0
 	if err != nil && limitstring != "" || limit < 0 {
-		log.Println("Error limit: " + err.Error())
 		http.Error(w, "Malformed URL, Invalid limit set ", http.StatusBadRequest)
 		return -1, err
 	}

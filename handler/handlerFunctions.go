@@ -2,7 +2,6 @@
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -28,7 +27,6 @@ func Request(url string, method string, contentType string) (http.Response, erro
 	client := &http.Client{}
 	defer client.CloseIdleConnections()
 
-	log.Println(url)
 	// Issue http request
 	res, err := client.Do(r)
 	if err != nil {
@@ -76,7 +74,6 @@ func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country 
 	// Get uni from hoplab
 	res, err := Request(reqUrl, http.MethodGet, "")
 	if err != nil {
-		log.Println("Error during request: " + err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return unisReq, err
 	}
@@ -84,7 +81,6 @@ func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country 
 	// Decode request into unis
 	err = json.NewDecoder(res.Body).Decode(&unisReq)
 	if err != nil {
-		log.Println("Error during encoding: " + err.Error())
 		http.Error(w, "Error during decoding", http.StatusInternalServerError)
 		return unisReq, err
 	}
@@ -158,7 +154,6 @@ func getCountryReq(w http.ResponseWriter, countryName string, searchMethod strin
 	// Decode request into countries
 	err = json.NewDecoder(res.Body).Decode(&countriesReq)
 	if err != nil {
-		log.Println("Error during encoding: " + err.Error())
 		http.Error(w, "Error during decoding", http.StatusInternalServerError)
 		return country, err
 	}
