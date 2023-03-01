@@ -20,7 +20,7 @@ func UniinfoHandler(w http.ResponseWriter, r *http.Request) {
 	args := strings.Split(r.URL.Path, "/")
 
 	// Check if url is correctly formated
-	if len(args) != 5 || args[4] == "" {
+	if (len(args) != 5 && len(args) != 6) || args[4] == "" {
 		http.Error(w, "Malformed URL, Expecting format "+UNIINFI_PATH+"name", http.StatusBadRequest)
 		return
 	}

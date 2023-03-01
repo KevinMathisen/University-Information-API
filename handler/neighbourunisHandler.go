@@ -141,7 +141,7 @@ func getArgsNURL(w http.ResponseWriter, r *http.Request) (string, string, error)
 	args := strings.Split(r.URL.Path, "/")
 
 	// Check if URl is correctly formated
-	if len(args) != 6 || args[4] == "" || args[5] == "" {
+	if (len(args) != 6 && len(args) != 7) || args[4] == "" || args[5] == "" {
 		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
 		return "", "", errors.New("malformed URL")
 	}
