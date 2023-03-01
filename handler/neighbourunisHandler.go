@@ -60,10 +60,6 @@ func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]strin
 	// List we want to return
 	var countries []string
 
-	// Add Original country to list of countries.
-	// NB If assignment only wants neighbours, not including country itself, remove this line
-	countries = append(countries, countryName)
-
 	// Get country specified
 	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL, false)
 	if err != nil {
