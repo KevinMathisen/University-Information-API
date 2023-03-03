@@ -25,8 +25,8 @@ func UniinfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get universities by request
-	unisReq, err := getUnisReq(w, r, args[4], "")
+	// Get universities data by requesting API
+	unisReq, err := getUnisData(w, r, args[4], "")
 	if err != nil {
 		return
 	}
@@ -38,6 +38,6 @@ func UniinfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with content to user
-	handleGetRequest(w, r, CONT_TYPE_JSON, unis)
+	respondToGetRequest(w, r, CONT_TYPE_JSON, unis)
 
 }

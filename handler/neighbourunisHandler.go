@@ -25,13 +25,13 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get country and university name from request
-	country, uniName, err := getArgsNURL(w, r)
+	country, uniName, err := getArgsNeighbourURL(w, r)
 	if err != nil {
 		return
 	}
 
 	// Get contires we want to find universities in
-	countries, err := getNeighboursCountryReq(w, country)
+	countries, err := getNeighboursCountry(w, country)
 	if err != nil {
 		return
 	}
@@ -49,26 +49,26 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with content to user
-	handleGetRequest(w, r, CONT_TYPE_JSON, unis)
+	respondToGetRequest(w, r, CONT_TYPE_JSON, unis)
 
 }
 
 /*
 Return a list of the names of the countries who border country specified
 */
-func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]string, error) {
-	// List we want to return
+func getNeighboursCountry(w http.ResponseWriter, countryName string) ([]string, error) {
+	// List of neighbouring countries we want to return
 	var countries []string
 
 	// Get country specified
-	country, err := getCountryReq(w, countryName, COUNTRY_SEARCH_URL, false)
+	country, err := getCountryData(w, countryName, COUNTRY_SEARCH_URL, false)
 	if err != nil {
 		return countries, err
 	}
 
 	// For each bordering country, get country name and add to array
 	for _, border := range country["borders"].([]interface{}) {
-		country, err = getCountryReq(w, border.(string), ISO_SEARCH_URL, true)
+		country, err = getCountryData(w, border.(string), ISO_SEARCH_URL, true)
 		if err != nil {
 			return countries, err
 		}
@@ -83,6 +83,7 @@ func getNeighboursCountryReq(w http.ResponseWriter, countryName string) ([]strin
 Returns all universities with given name in given countries
 */
 func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, countries []string, limit int) ([]map[string]interface{}, error) {
+	// List of universeties we want to return from specified country
 	var unis []map[string]interface{}
 
 	// Get universities for each country
@@ -93,7 +94,7 @@ func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, co
 		}
 
 		// Get all universities for a given country
-		unisReq, err := getUnisReq(w, r, uniName, country)
+		unisReq, err := getUnisData(w, r, uniName, country)
 		if err != nil {
 			return unis, err
 		}
@@ -132,7 +133,7 @@ func getLimitParam(w http.ResponseWriter, r *http.Request) (int, error) {
 /*
 Get arguments country name and university name from URL path, and checks for errors
 */
-func getArgsNURL(w http.ResponseWriter, r *http.Request) (string, string, error) {
+func getArgsNeighbourURL(w http.ResponseWriter, r *http.Request) (string, string, error) {
 	// Split path into args
 	args := strings.Split(r.URL.Path, "/")
 
@@ -142,5 +143,6 @@ func getArgsNURL(w http.ResponseWriter, r *http.Request) (string, string, error)
 		return "", "", errors.New("malformed URL")
 	}
 
+	// Return name of country and university name provided in the URL path
 	return args[4], args[5], nil
 }

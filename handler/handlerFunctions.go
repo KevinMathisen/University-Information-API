@@ -10,7 +10,7 @@ import (
 Creates and sends a request to specified URL with specified method and content type.
 Returns errors if any.
 */
-func Request(url string, method string, contentType string) (http.Response, error) {
+func requestGetFromUrl(url string, method string, contentType string) (http.Response, error) {
 	// Create empty response to return in case of error
 	var response http.Response
 
@@ -40,9 +40,9 @@ func Request(url string, method string, contentType string) (http.Response, erro
 /*
 Handles get request when body is of type json
 */
-func handleGetRequest(w http.ResponseWriter, r *http.Request, contentType string, jsonBody interface{}) {
+func respondToGetRequest(w http.ResponseWriter, r *http.Request, contentType string, jsonBody interface{}) {
 	// Write content type
-	w.Header().Add("content-type", CONT_TYPE_JSON)
+	w.Header().Add("content-type", contentType)
 
 	// Encode content and write to response
 	err := json.NewEncoder(w).Encode(jsonBody)
@@ -56,15 +56,15 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request, contentType string
 }
 
 /*
-Get all universities from hipolab with arguments provided by client in request
+Get data for all universities from universeties API which satisfy arguments provided
 */
-func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country string) ([]map[string]interface{}, error) {
+func getUnisData(w http.ResponseWriter, r *http.Request, uniName string, country string) ([]map[string]interface{}, error) {
 
 	// List of open-ended map structures, which we can populate with results from hipolab
 	var unisReq []map[string]interface{}
 
 	// Create url to request from:							TODO: add + "name="
-	reqUrl := UNI_URL + UNI_SEARCH_PATH + "name=" + formatURLArg(uniName)
+	reqUrl := UNI_URL + UNI_SEARCH_PATH + "?name=" + formatURLArg(uniName)
 
 	// Check if country specified
 	if country != "" {
@@ -72,7 +72,7 @@ func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country 
 	}
 
 	// Get uni from hoplab
-	res, err := Request(reqUrl, http.MethodGet, "")
+	res, err := requestGetFromUrl(reqUrl, http.MethodGet, "")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return unisReq, err
@@ -92,6 +92,7 @@ func getUnisReq(w http.ResponseWriter, r *http.Request, uniName string, country 
 Creates and return a slice of all universities provided
 */
 func createUnisStruct(w http.ResponseWriter, unisReq []map[string]interface{}) ([]Uni, error) {
+	// List of university structs we want to return
 	var unis []Uni
 
 	// For each university we got create a uni struct, and add it to our response
@@ -113,7 +114,7 @@ Create a uni struct with all information by asking restcountries
 func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni, error) {
 
 	// Get country uni is located in
-	country, err := getCountryReq(w, getCountryUni(uniReq), COUNTRY_SEARCH_URL, false)
+	country, err := getCountryData(w, getCountryUni(uniReq), COUNTRY_SEARCH_URL, false)
 	if err != nil {
 		return Uni{}, err
 	}
@@ -132,9 +133,9 @@ func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni,
 }
 
 /*
-Returns a map of the country specified
+Returns a map of the country specified by requsting the country API
 */
-func getCountryReq(w http.ResponseWriter, countryName string, searchMethod string, isoSearch bool) (map[string]interface{}, error) {
+func getCountryData(w http.ResponseWriter, countryName string, searchMethod string, isoSearch bool) (map[string]interface{}, error) {
 	// Create country map
 	var country map[string]interface{}
 
@@ -142,7 +143,7 @@ func getCountryReq(w http.ResponseWriter, countryName string, searchMethod strin
 	reqUrl := COUNTRY_URL + searchMethod + countryName
 
 	// Get country from restcountries
-	res, err := Request(reqUrl, http.MethodGet, "")
+	res, err := requestGetFromUrl(reqUrl, http.MethodGet, "")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return country, err
@@ -200,6 +201,7 @@ func getLanguagesCountry(country map[string]interface{}) map[string]string {
 Return all webpages from a university as a list of strings
 */
 func getWebpagesUni(uni map[string]interface{}) []string {
+	// List of webpages for the provided university we want to return
 	var webpages []string
 
 	// Convert each webpage in uni map to a string and add to new list
