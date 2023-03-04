@@ -25,6 +25,7 @@ func main() {
 	http.HandleFunc(handler.DIAG_PATH, func(w http.ResponseWriter, r *http.Request) { handler.DiagHandler(w, r, start) })
 	http.HandleFunc(handler.UNIINFI_PATH, handler.UniinfoHandler)
 	http.HandleFunc(handler.NEIGHBOURUNIS_PATH, handler.NeighbourunisHandler)
+	http.HandleFunc(handler.COUNTRYUNIS_PATH, handler.CountryunisHandler)
 
 	// Start server
 	log.Println("Starting server on port " + port + " ...")

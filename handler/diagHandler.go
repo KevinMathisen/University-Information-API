@@ -24,7 +24,7 @@ func DiagHandler(w http.ResponseWriter, r *http.Request, start time.Time) {
 	}
 
 	// Handle get request
-	handleGetRequest(w, r, CONT_TYPE_JSON, diagRes)
+	respondToGetRequest(w, r, CONT_TYPE_JSON, diagRes)
 
 }
 
@@ -34,13 +34,13 @@ Creates and returns a diag struct
 func createDiagRes(start time.Time) (Diag, error) {
 
 	// Get request from uni  source
-	resUni, err := Request(UNI_URL, http.MethodHead, "")
+	resUni, err := requestGetFromUrl(UNI_URL, http.MethodHead, "")
 	if err != nil {
 		return Diag{}, err
 	}
 
 	// Get request from country source
-	resCountry, err := Request(COUNTRY_URL, http.MethodHead, "")
+	resCountry, err := requestGetFromUrl(COUNTRY_URL, http.MethodHead, "")
 	if err != nil {
 		return Diag{}, err
 	}

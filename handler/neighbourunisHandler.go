@@ -1,10 +1,7 @@
 ﻿package handler
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 /*
@@ -25,7 +22,7 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get country and university name from request
-	country, uniName, err := getArgsNeighbourURL(w, r)
+	country, uniName, err := getArgsCountryUniURL(w, r)
 	if err != nil {
 		return
 	}
@@ -110,39 +107,4 @@ func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, co
 	}
 
 	return unis, nil
-}
-
-/*
-Return limit from URL or 0 if not set, and checks for errors
-*/
-func getLimitParam(w http.ResponseWriter, r *http.Request) (int, error) {
-	// Parse url to get country, university name and limit
-	limitstring := (r.URL.Query()).Get("limit")
-
-	// Try to convert limit to a number if limit is specified
-	limit, err := strconv.Atoi(limitstring)
-	// If there was an error and limit was set by user, or if the limit is less than 0
-	if err != nil && limitstring != "" || limit < 0 {
-		http.Error(w, "Malformed URL, Invalid limit set ", http.StatusBadRequest)
-		return -1, err
-	}
-
-	return limit, nil
-}
-
-/*
-Get arguments country name and university name from URL path, and checks for errors
-*/
-func getArgsNeighbourURL(w http.ResponseWriter, r *http.Request) (string, string, error) {
-	// Split path into args
-	args := strings.Split(r.URL.Path, "/")
-
-	// Check if URl is correctly formated
-	if (len(args) != 6 && len(args) != 7) || args[4] == "" || args[5] == "" {
-		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
-		return "", "", errors.New("malformed URL")
-	}
-
-	// Return name of country and university name provided in the URL path
-	return args[4], args[5], nil
 }

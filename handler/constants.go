@@ -6,6 +6,7 @@ const DEFAULT_PATH = "/"
 const UNIINFI_PATH = SERVICE_PATH + "/uniinfo/"
 const NEIGHBOURUNIS_PATH = SERVICE_PATH + "/neighbourunis/"
 const DIAG_PATH = SERVICE_PATH + "/diag/"
+const COUNTRYUNIS_PATH = SERVICE_PATH + "/countryunis/"
 
 // Service URL
 const UNI_URL = "http://universities.hipolabs.com"
