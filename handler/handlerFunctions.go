@@ -3,6 +3,7 @@
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -58,20 +59,34 @@ func respondToGetRequest(w http.ResponseWriter, r *http.Request, contentType str
 }
 
 /*
-Get data for all universities from universeties API which satisfy arguments provided
+Get data for all universities from universeties API which satisfy arguments provided.
+Can specify university name, country name, or both when searching
+Returns a slice of maps which contain data for each university found
 */
 func getUnisData(w http.ResponseWriter, r *http.Request, uniName string, country string) ([]map[string]interface{}, error) {
 
 	// List of open-ended map structures, which we can populate with results from hipolab
 	var unisReq []map[string]interface{}
+	// URL to request data from
+	var reqUrl string
 
-	// Create url to request from:							TODO: add + "name="
-	reqUrl := UNI_URL + UNI_SEARCH_PATH + "?name=" + formatURLArg(uniName)
-
-	// Check if country specified
-	if country != "" {
+	// Create url to request from depending on the arguments provided:
+	if uniName != "" && country != "" { // Uni and country specified
+		reqUrl = UNI_URL + UNI_SEARCH_PATH + "?name=" + formatURLArg(uniName)
 		reqUrl += "&country=" + formatURLArg(country)
+
+	} else if uniName != "" { // Uni specified
+		reqUrl = UNI_URL + UNI_SEARCH_PATH + "?name=" + formatURLArg(uniName)
+
+	} else if country != "" { // Country specified
+		reqUrl = UNI_URL + UNI_SEARCH_PATH + "?country=" + formatURLArg(country)
+
+	} else { // No argument specified
+		http.Error(w, "Malformed URL, required fields not specified", http.StatusBadRequest)
+		return unisReq, errors.New("malformed URL")
 	}
+
+	log.Println(reqUrl)
 
 	// Get uni from hoplab
 	res, err := requestGetFromUrl(reqUrl, http.MethodGet, "")
