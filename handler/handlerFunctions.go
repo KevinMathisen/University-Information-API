@@ -308,13 +308,13 @@ func getLimitParam(w http.ResponseWriter, r *http.Request) (int, error) {
 /*
 Get arguments country name and university name from URL path, and checks for errors
 */
-func getArgsCountryUniURL(w http.ResponseWriter, r *http.Request) (string, string, error) {
+func getArgsCountryUniURL(w http.ResponseWriter, r *http.Request, path string) (string, string, error) {
 	// Split path into args
 	args := strings.Split(r.URL.Path, "/")
 
 	// Check if URl is correctly formated
 	if (len(args) != 6 && len(args) != 7) || args[4] == "" || args[5] == "" {
-		http.Error(w, "Malformed URL, Expecting format "+NEIGHBOURUNIS_PATH+"country/uniName{?limit=num}", http.StatusBadRequest)
+		http.Error(w, "Malformed URL, Expecting format "+path+"countryName/uniName{?limit=num}", http.StatusBadRequest)
 		return "", "", errors.New("malformed URL")
 	}
 

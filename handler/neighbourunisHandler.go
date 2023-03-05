@@ -22,7 +22,7 @@ func NeighbourunisHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get country and university name from request
-	country, uniName, err := getArgsCountryUniURL(w, r)
+	country, uniName, err := getArgsCountryUniURL(w, r, NEIGHBOURUNIS_PATH)
 	if err != nil {
 		return
 	}
