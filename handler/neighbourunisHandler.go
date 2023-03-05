@@ -75,36 +75,3 @@ func getNeighboursCountry(w http.ResponseWriter, countryName string) ([]string, 
 	return countries, nil
 
 }
-
-/*
-Returns all universities with given name in given countries
-*/
-func getUnisInCountry(w http.ResponseWriter, r *http.Request, uniName string, countries []string, limit int) ([]map[string]interface{}, error) {
-	// List of universeties we want to return from specified country
-	var unis []map[string]interface{}
-
-	// Get universities for each country
-	for _, country := range countries {
-		// If limit set by user is reached
-		if len(unis) >= limit && limit != 0 {
-			return unis, nil
-		}
-
-		// Get all universities for a given country
-		unisReq, err := getUnisData(w, r, uniName, country)
-		if err != nil {
-			return unis, err
-		}
-
-		// Check if limit is exceded, if so we cut out part of the response
-		if len(unis)+len(unisReq) > limit && limit != 0 {
-			maxLen := limit - len(unis)
-			unisReq = unisReq[:maxLen]
-		}
-
-		// Save universities
-		unis = append(unis, unisReq...)
-	}
-
-	return unis, nil
-}
