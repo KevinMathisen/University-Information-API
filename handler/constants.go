@@ -12,7 +12,9 @@ const COUNTRYALLUNIS_PATH = SERVICE_PATH + "/countryallunis/"
 // Service URL
 const UNI_URL = "http://universities.hipolabs.com"
 const UNI_SEARCH_PATH = "/search"
-const COUNTRY_URL = "https://restcountries.com"
+
+// const COUNTRY_URL = "https://restcountries.com"
+const COUNTRY_URL = "http://129.241.150.113:8080"
 const COUNTRY_SEARCH_URL = "/v3.1/name/"
 const ISO_SEARCH_URL = "/v3.1/alpha/"
 
