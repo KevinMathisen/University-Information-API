@@ -164,7 +164,7 @@ Create a uni struct with all information by asking restcountries
 func createUniStruct(w http.ResponseWriter, uniReq map[string]interface{}) (Uni, error) {
 
 	// Get country uni is located in
-	country, err := getCountryData(w, getCountryUni(uniReq), COUNTRY_SEARCH_URL, false)
+	country, err := getCountryData(w, getISOUni(uniReq), ISO_SEARCH_URL, true)
 	if err != nil {
 		return Uni{}, err
 	}
@@ -267,6 +267,13 @@ Return country of a university as a string
 */
 func getCountryUni(uni map[string]interface{}) string {
 	return uni["country"].(string)
+}
+
+/*
+Return ISO of a university as a string
+*/
+func getISOUni(uni map[string]interface{}) string {
+	return uni["alpha_two_code"].(string)
 }
 
 /*
