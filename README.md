@@ -1,6 +1,7 @@
-# Assignment 1
+# Assignment 1 - University Information API
 
-Assignment 1 for PROG2005 Spring 2023
+Assignment 1 for PROG2005 Spring 2023. 
+Provides an API for accessing information about universities in different contries with seach criteria. 
 
 Owner: Kevin Nikolai Mathisen
 Email: Kevinnm@stud.ntnu.no
